@@ -8,11 +8,17 @@ package org.jetbrains.kotlin.idea.editor
 import com.intellij.application.options.CodeStyle
 import com.intellij.openapi.util.io.FileUtil
 import com.intellij.testFramework.EditorTestUtil
+import com.intellij.testFramework.LightProjectDescriptor
 import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.idea.test.KotlinLightCodeInsightFixtureTestCase
+import org.jetbrains.kotlin.idea.test.KotlinLightProjectDescriptor
+import org.jetbrains.kotlin.idea.test.KotlinWithJdkAndRuntimeLightProjectDescriptor
+import org.jetbrains.kotlin.test.InTextDirectivesUtils
 import org.jetbrains.kotlin.test.KotlinTestUtils
 import org.jetbrains.kotlin.test.SettingsConfigurator
+import org.jetbrains.kotlin.utils.rethrow
 import java.io.File
+import java.io.IOException
 
 abstract class AbstractMultiLineStringIndentTest : KotlinLightCodeInsightFixtureTestCase() {
     val FILE_SEPARATOR = "//-----"
@@ -64,6 +70,17 @@ abstract class AbstractMultiLineStringIndentTest : KotlinLightCodeInsightFixture
         }
     }
 
-    override fun getProjectDescriptor() = JAVA_LATEST!!
-    override fun getTestDataPath(): String = ""
+    override fun getProjectDescriptor(): LightProjectDescriptor {
+        if (isAllFilesPresentInTest()) return KotlinLightProjectDescriptor.INSTANCE
+        return try {
+            val fileText = FileUtil.loadFile(File(testDataPath, fileName()), true)
+            if (InTextDirectivesUtils.isDirectiveDefined(fileText, "WITH_RUNTIME")) {
+                KotlinWithJdkAndRuntimeLightProjectDescriptor.INSTANCE
+            } else {
+                JAVA_LATEST!!
+            }
+        } catch (e: IOException) {
+            throw rethrow(e)
+        }
+    }    
 }
