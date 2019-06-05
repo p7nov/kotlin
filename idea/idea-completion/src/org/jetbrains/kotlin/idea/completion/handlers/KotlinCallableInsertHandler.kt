@@ -19,14 +19,18 @@ package org.jetbrains.kotlin.idea.completion.handlers
 import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.descriptors.CallableDescriptor
 import org.jetbrains.kotlin.idea.completion.isArtificialImportAliasedDescriptor
 import org.jetbrains.kotlin.idea.core.ShortenReferences
 import org.jetbrains.kotlin.idea.core.completion.DeclarationLookupObject
 import org.jetbrains.kotlin.idea.imports.importableFqName
+import org.jetbrains.kotlin.idea.references.putTargetToUserDataRecursively
 import org.jetbrains.kotlin.idea.util.CallType
 import org.jetbrains.kotlin.idea.util.ImportInsertHelper
 import org.jetbrains.kotlin.psi.KtFile
+import org.jetbrains.kotlin.psi.psiUtil.endOffset
+import org.jetbrains.kotlin.psi.psiUtil.parentsWithSelf
 import org.jetbrains.kotlin.renderer.render
 import org.jetbrains.kotlin.resolve.DescriptorUtils
 
@@ -63,6 +67,11 @@ abstract class KotlinCallableInsertHandler(val callType: CallType<*>) : BaseDecl
                 ) // insert space after for correct parsing
 
                 psiDocumentManager.commitAllDocuments()
+
+                val elementToShorten =
+                    (file.findElementAt(context.startOffset) as PsiElement).parentsWithSelf.last { it.endOffset <= context.tailOffset - 1 }
+
+                o.psiElement?.let { putTargetToUserDataRecursively(elementToShorten, it) }
 
                 shortenReferences.process(file, context.startOffset, context.tailOffset - 1)
 

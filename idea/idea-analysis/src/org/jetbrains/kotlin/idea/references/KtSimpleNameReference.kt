@@ -17,8 +17,10 @@
 package org.jetbrains.kotlin.idea.references
 
 import com.intellij.openapi.extensions.Extensions
+import com.intellij.openapi.util.Key
 import com.intellij.openapi.util.TextRange
 import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiMember
 import com.intellij.psi.util.PsiTreeUtil
 import com.intellij.util.IncorrectOperationException
 import com.intellij.util.SmartList
@@ -47,6 +49,29 @@ import org.jetbrains.kotlin.resolve.ImportedFromObjectCallableDescriptor
 import org.jetbrains.kotlin.resolve.descriptorUtil.getImportableDescriptor
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.kotlin.types.expressions.OperatorConventions
+
+val TARGET_ELEMENT_KEY = Key.create<PsiElement>("target.element.key")
+
+tailrec fun putTargetToUserDataRecursively(elementToShorten: PsiElement, targetElement: PsiElement) {
+    elementToShorten.putCopyableUserData(TARGET_ELEMENT_KEY, targetElement)
+    if (elementToShorten is KtQualifiedExpression) {
+        val receiver = elementToShorten.receiverExpression
+        when (targetElement) {
+            is PsiMember -> {
+                val containingClass = targetElement.containingClass
+                if (containingClass != null) {
+                    putTargetToUserDataRecursively(receiver, containingClass)
+                }
+            }
+            is KtDeclaration -> {
+                val containingClassOrObject = targetElement.containingClassOrObject
+                if (containingClassOrObject != null) {
+                    putTargetToUserDataRecursively(receiver, containingClassOrObject)
+                }
+            }
+        }
+    }
+}
 
 class KtSimpleNameReference(expression: KtSimpleNameExpression) : KtSimpleReference<KtSimpleNameExpression>(expression) {
     override fun getTargetDescriptors(context: BindingContext): Collection<DeclarationDescriptor> {
@@ -183,12 +208,21 @@ class KtSimpleNameReference(expression: KtSimpleNameExpression) : KtSimpleRefere
             return newExpression
         }
 
-        return when (shorteningMode) {
-            ShorteningMode.FORCED_SHORTENING -> ShortenReferences.DEFAULT.process(newQualifiedElement)
-            else -> {
-                newQualifiedElement.addToShorteningWaitSet()
-                newExpression
+        if (targetElement != null) putTargetToUserDataRecursively(newQualifiedElement, targetElement)
+        if (newQualifiedElement is KtQualifiedExpression) {
+            val receiverExpression = newQualifiedElement.receiverExpression
+            when (targetElement) {
+                is KtDeclaration -> {
+                    val containingClassOrObject = targetElement.containingClassOrObject
+                    if (containingClassOrObject != null) receiverExpression.putCopyableUserData(TARGET_ELEMENT_KEY, containingClassOrObject)
+                }
             }
+        }
+        if (shorteningMode == ShorteningMode.FORCED_SHORTENING) {
+            return ShortenReferences.DEFAULT.process(newQualifiedElement)
+        } else {
+            newQualifiedElement.addToShorteningWaitSet()
+            return newExpression
         }
     }
 

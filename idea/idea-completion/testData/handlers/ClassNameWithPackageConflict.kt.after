@@ -1,0 +1,6 @@
+import java.util.*
+
+fun buildTemplates() {
+    val java = 1123
+    Collections<caret>
+}

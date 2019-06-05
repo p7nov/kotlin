@@ -6,17 +6,19 @@
 package org.jetbrains.kotlin.idea.core
 
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiDocumentManager
-import com.intellij.psi.PsiElement
-import com.intellij.psi.SmartPsiElementPointer
+import com.intellij.psi.*
 import com.intellij.psi.impl.source.PostprocessReformattingAspect
 import com.intellij.psi.util.PsiTreeUtil
 import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.idea.analysis.analyzeAsReplacement
 import org.jetbrains.kotlin.idea.caches.resolve.allowResolveInWriteAction
 import org.jetbrains.kotlin.idea.caches.resolve.getResolutionFacade
+import org.jetbrains.kotlin.idea.caches.resolve.resolveToDescriptorIfAny
+import org.jetbrains.kotlin.idea.caches.resolve.util.getJavaMemberDescriptor
+import org.jetbrains.kotlin.idea.caches.resolve.util.getJavaMethodDescriptor
+import org.jetbrains.kotlin.idea.caches.resolve.util.resolveToDescriptor
 import org.jetbrains.kotlin.idea.imports.canBeReferencedViaImport
-import org.jetbrains.kotlin.idea.imports.getImportableTargets
+import org.jetbrains.kotlin.idea.references.TARGET_ELEMENT_KEY
 import org.jetbrains.kotlin.idea.references.mainReference
 import org.jetbrains.kotlin.idea.util.*
 import org.jetbrains.kotlin.incremental.components.NoLookupLocation
@@ -29,6 +31,7 @@ import org.jetbrains.kotlin.resolve.calls.callUtil.getCalleeExpressionIfAny
 import org.jetbrains.kotlin.resolve.calls.callUtil.getResolvedCall
 import org.jetbrains.kotlin.resolve.calls.model.VariableAsFunctionResolvedCall
 import org.jetbrains.kotlin.resolve.calls.tasks.ExplicitReceiverKind
+import org.jetbrains.kotlin.resolve.descriptorUtil.getImportableDescriptor
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
 import org.jetbrains.kotlin.resolve.scopes.receivers.ImplicitReceiver
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue
@@ -37,7 +40,35 @@ import org.jetbrains.kotlin.resolve.scopes.utils.findPackage
 import org.jetbrains.kotlin.resolve.source.getPsi
 import java.util.*
 
-class ShortenReferences(val options: (KtElement) -> Options = { Options.DEFAULT }) {
+fun KtReferenceExpression.getReferenceTarget(context: BindingContext, fallback: PsiElement?): DeclarationDescriptor? {
+    val declarationDescriptor = context[BindingContext.REFERENCE_TARGET, this]
+    if ((declarationDescriptor == null || !declarationDescriptor.canBeReferencedViaImport())) {
+        when (fallback) {
+            is KtDeclaration ->
+                return fallback.resolveToDescriptorIfAny()
+            is PsiClass ->
+                return fallback.resolveToDescriptor(getResolutionFacade())
+            is PsiMethod ->
+                return fallback.getJavaMethodDescriptor()
+            is PsiMember ->
+                return fallback.getJavaMemberDescriptor()
+        }
+    }
+    return declarationDescriptor
+}
+
+fun KtExpression.getReferenceTargets(context: BindingContext, fallback: PsiElement?): Collection<DeclarationDescriptor> {
+    val targetDescriptor = if (this is KtReferenceExpression) this.getReferenceTarget(context, fallback) else null
+    return targetDescriptor?.let { listOf(it) } ?: context[BindingContext.AMBIGUOUS_REFERENCE_TARGET, this].orEmpty()
+}
+
+fun KtReferenceExpression.getImportableTargets(bindingContext: BindingContext, fallback: PsiElement?): Collection<DeclarationDescriptor> {
+    val targets = bindingContext[BindingContext.SHORT_REFERENCE_TO_COMPANION_OBJECT, this]?.let { listOf(it) }
+        ?: getReferenceTargets(bindingContext, fallback)
+    return targets.map { it.getImportableDescriptor() }.toSet()
+}
+
+class ShortenReferences(val options: (KtElement) -> Options = { Options.DEFAULT }) { //options
     data class Options(
         val removeThisLabels: Boolean = false,
         val removeThis: Boolean = false,
@@ -64,13 +95,16 @@ class ShortenReferences(val options: (KtElement) -> Options = { Options.DEFAULT 
                 is KtDotQualifiedExpression -> receiver.selectorExpression as? KtNameReferenceExpression ?: return false
                 else -> return false
             }
-            when (val targetDescriptor = bindingContext[BindingContext.REFERENCE_TARGET, nameRef]) {
+            val fallbackTarget = element.getCopyableUserData(TARGET_ELEMENT_KEY)
+            val targetDescriptor: DeclarationDescriptor? = nameRef.getReferenceTarget(bindingContext, fallbackTarget)
+            when (targetDescriptor) {
                 is ClassDescriptor -> {
                     if (targetDescriptor.kind != ClassKind.OBJECT) return true
                     // for object receiver we should additionally check that it's dispatch receiver (that is the member is inside the object) or not a receiver at all
-                    val resolvedCall = element.getResolvedCall(bindingContext)
-                        ?: return element.getQualifiedElementSelector()?.mainReference?.resolveToDescriptors(bindingContext) != null
-
+                    val resolvedCall =
+                        element.getResolvedCall(bindingContext) ?:
+                        return element.getQualifiedElementSelector()?.mainReference?.resolveToDescriptors(bindingContext) != null ||
+                                fallbackTarget != null
                     val receiverKind = resolvedCall.explicitReceiverKind
                     return receiverKind == ExplicitReceiverKind.DISPATCH_RECEIVER || receiverKind == ExplicitReceiverKind.NO_EXPLICIT_RECEIVER
                 }
@@ -83,7 +117,9 @@ class ShortenReferences(val options: (KtElement) -> Options = { Options.DEFAULT 
 
         private fun DeclarationDescriptor.asString() = DescriptorRenderer.FQ_NAMES_IN_TYPES.render(this)
 
-        private fun KtReferenceExpression.targets(context: BindingContext) = getImportableTargets(context)
+        private fun KtReferenceExpression.targets(context: BindingContext, fallback: PsiElement? = null): Collection<DeclarationDescriptor> {
+            return getImportableTargets(context, fallback)
+        }
 
         private fun mayImport(descriptor: DeclarationDescriptor, file: KtFile): Boolean {
             return descriptor.canBeReferencedViaImport()
@@ -481,7 +517,8 @@ class ShortenReferences(val options: (KtElement) -> Options = { Options.DEFAULT 
             val callee = selector.getCalleeExpressionIfAny() as? KtReferenceExpression ?: return AnalyzeQualifiedElementResult.Skip
 
 
-            val targets = callee.targets(bindingContext)
+            val fallback = element.getCopyableUserData(TARGET_ELEMENT_KEY)
+            val targets = callee.targets(bindingContext, fallback)
             val resolvedCall = callee.getResolvedCall(bindingContext)
 
             if (targets.isEmpty()) return AnalyzeQualifiedElementResult.Skip

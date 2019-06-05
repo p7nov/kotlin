@@ -50,6 +50,7 @@ import org.jetbrains.kotlin.idea.references.mainReference
 import org.jetbrains.kotlin.idea.references.resolveMainReferenceToDescriptors
 import org.jetbrains.kotlin.idea.util.ImportInsertHelper
 import org.jetbrains.kotlin.idea.util.application.executeWriteCommand
+import org.jetbrains.kotlin.js.resolve.diagnostics.findPsi
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.isOneSegmentFQN
 import org.jetbrains.kotlin.name.parentOrNull
@@ -257,7 +258,8 @@ class KotlinAddImportAction internal constructor(
                         importableFqName?.let {
                             element.mainReference.bindToFqName(
                                 it,
-                                KtSimpleNameReference.ShorteningMode.FORCED_SHORTENING
+                                KtSimpleNameReference.ShorteningMode.FORCED_SHORTENING,
+                                targetElement = descriptor.findPsi()
                             )
                         }
                     }

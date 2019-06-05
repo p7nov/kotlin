@@ -1,0 +1,13 @@
+package templates
+
+import templates.Foo
+
+enum class Foo {
+    XXX
+}
+
+fun buildTemplates() {
+    val templates = 123
+
+    Foo.XXX<caret>
+}

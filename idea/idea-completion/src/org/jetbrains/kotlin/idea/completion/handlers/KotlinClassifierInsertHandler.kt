@@ -20,6 +20,7 @@ import com.intellij.codeInsight.completion.InsertionContext
 import com.intellij.codeInsight.lookup.LookupElement
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiDocumentManager
+import com.intellij.psi.PsiElement
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.ClassifierDescriptor
 import org.jetbrains.kotlin.idea.caches.resolve.allowResolveInWriteAction
@@ -28,11 +29,14 @@ import org.jetbrains.kotlin.idea.completion.isAfterDot
 import org.jetbrains.kotlin.idea.completion.isArtificialImportAliasedDescriptor
 import org.jetbrains.kotlin.idea.core.ShortenReferences
 import org.jetbrains.kotlin.idea.core.completion.DeclarationLookupObject
+import org.jetbrains.kotlin.idea.references.putTargetToUserDataRecursively
 import org.jetbrains.kotlin.idea.util.CallTypeAndReceiver
 import org.jetbrains.kotlin.idea.util.IdeDescriptorRenderers
 import org.jetbrains.kotlin.name.FqNameUnsafe
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.psi.KtNameReferenceExpression
+import org.jetbrains.kotlin.psi.psiUtil.endOffset
+import org.jetbrains.kotlin.psi.psiUtil.parentsWithSelf
 import org.jetbrains.kotlin.renderer.render
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.lazy.BodyResolveMode
@@ -84,6 +88,10 @@ object KotlinClassifierInsertHandler : BaseDeclarationInsertHandler() {
                 val classNameEnd = classNameStart + qualifiedName.length
                 val rangeMarker = document.createRangeMarker(classNameStart, classNameEnd)
                 val wholeRangeMarker = document.createRangeMarker(startOffset, classNameEnd + tempSuffix.length)
+
+                val elementToShorten = (file.findElementAt(classNameStart) as PsiElement).parentsWithSelf.last { it.endOffset <= classNameEnd }
+
+                lookupObject.psiElement?.let { putTargetToUserDataRecursively(elementToShorten, it) }
 
                 ShortenReferences.DEFAULT.process(file, classNameStart, classNameEnd)
                 psiDocumentManager.doPostponedOperationsAndUnblockDocument(document)
