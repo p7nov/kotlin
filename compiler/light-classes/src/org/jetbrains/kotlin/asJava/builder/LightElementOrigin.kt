@@ -52,6 +52,7 @@ interface LightMemberOrigin : LightElementOrigin {
     override val originKind: JvmDeclarationOriginKind
     val parametersForJvmOverloads: List<KtParameter?>? get() = null
 
+    fun isValid(): Boolean
     fun isEquivalentTo(other: LightMemberOrigin?): Boolean
     fun copy(): LightMemberOrigin
 }
@@ -61,6 +62,8 @@ data class LightMemberOriginForDeclaration(
     override val originKind: JvmDeclarationOriginKind,
     override val parametersForJvmOverloads: List<KtParameter?>? = null
 ) : LightMemberOrigin {
+    override fun isValid(): Boolean = originalElement.isValid
+
     override fun isEquivalentTo(other: LightMemberOrigin?): Boolean {
         if (other !is LightMemberOriginForDeclaration) return false
         return originalElement.isEquivalentTo(other.originalElement)
