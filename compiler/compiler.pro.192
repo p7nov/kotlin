@@ -16,45 +16,45 @@ messages/**)
 
 -dontnote **
 -dontwarn apple.awt.*
--dontwarn dk.brics.automaton.*
--dontwarn org.fusesource.**
--dontwarn org.imgscalr.Scalr**
--dontwarn org.xerial.snappy.SnappyBundleActivator
+-dontwarn com.google.common.util.concurrent.*
+-dontwarn com.google.errorprone.**
+-dontwarn com.google.j2objc.**
+-dontwarn com.google.j2objc.annotations.Weak
+-dontwarn com.intellij.psi.util.PsiClassUtil
+-dontwarn com.intellij.ui.**
 -dontwarn com.intellij.util.CompressionUtil
+-dontwarn com.intellij.util.IconUtil
+-dontwarn com.intellij.util.ImageLoader
+-dontwarn com.intellij.util.ImageLoader$ImageDesc
+-dontwarn com.intellij.util.io.Compressor$Tar
+-dontwarn com.intellij.util.io.TarUtil
 -dontwarn com.intellij.util.SnappyInitializer
 -dontwarn com.intellij.util.SVGLoader
 -dontwarn com.intellij.util.SVGLoader$MyTranscoder
--dontwarn com.intellij.util.ImageLoader$ImageDesc
 -dontwarn com.intellij.util.ui.**
--dontwarn com.intellij.ui.**
--dontwarn com.intellij.util.IconUtil
--dontwarn com.intellij.util.ImageLoader
--dontwarn kotlinx.coroutines.flow.FlowKt__MergeKt
--dontwarn net.sf.cglib.**
--dontwarn org.objectweb.asm.** # this is ASM3, the old version that we do not use
 -dontwarn com.sun.jna.NativeString
 -dontwarn com.sun.jna.WString
--dontwarn com.intellij.psi.util.PsiClassUtil
+-dontwarn dk.brics.automaton.*
+-dontwarn java.lang.invoke.MethodHandle
+-dontwarn javaslang.*
+-dontwarn javaslang.match.annotation.Patterns
+-dontwarn javaslang.match.annotation.Unapply
+-dontwarn javax.crypto.**
+-dontwarn kotlinx.coroutines.flow.FlowKt__MergeKt
+-dontwarn net.sf.cglib.**
 -dontwarn org.apache.hadoop.io.compress.*
--dontwarn com.google.j2objc.annotations.Weak
--dontwarn org.iq80.snappy.HadoopSnappyCodec$SnappyCompressionInputStream
--dontwarn org.iq80.snappy.HadoopSnappyCodec$SnappyCompressionOutputStream
--dontwarn com.google.common.util.concurrent.*
 -dontwarn org.apache.xerces.dom.**
 -dontwarn org.apache.xerces.util.**
--dontwarn org.w3c.dom.ElementTraversal
--dontwarn javaslang.match.annotation.Unapply
--dontwarn javaslang.match.annotation.Patterns
--dontwarn javaslang.*
--dontwarn com.google.errorprone.**
--dontwarn com.google.j2objc.**
--dontwarn javax.crypto.**
--dontwarn java.lang.invoke.MethodHandle
--dontwarn org.jline.builtins.Nano$Buffer
--dontwarn org.jetbrains.annotations.ReadOnly
+-dontwarn org.fusesource.**
+-dontwarn org.imgscalr.Scalr**
+-dontwarn org.iq80.snappy.HadoopSnappyCodec$SnappyCompressionInputStream
+-dontwarn org.iq80.snappy.HadoopSnappyCodec$SnappyCompressionOutputStream
 -dontwarn org.jetbrains.annotations.Mutable
--dontwarn com.intellij.util.io.TarUtil
--dontwarn com.intellij.util.io.Compressor$Tar
+-dontwarn org.jetbrains.annotations.ReadOnly
+-dontwarn org.jline.builtins.Nano$Buffer
+-dontwarn org.objectweb.asm.** # this is ASM3, the old version that we do not use
+-dontwarn org.w3c.dom.ElementTraversal
+-dontwarn org.xerial.snappy.SnappyBundleActivator
 
 # Annotations from intellijCore/annotations.jar that not presented in org.jetbrains.annotations
 -dontwarn org.jetbrains.annotations.Async*
@@ -74,12 +74,11 @@ messages/**)
 # The appropriate jar is either loaded separately or added explicitly to the classpath then needed
 -dontwarn org.jetbrains.kotlin.scripting.compiler.plugin.ScriptingCompilerConfigurationComponentRegistrar
 
--dontwarn org.jdom.xpath.jaxen.*
 -dontwarn com.intellij.util.io.Decompressor*
+-dontwarn org.jdom.xpath.jaxen.*
+-dontwarn org.slf4j.**
 -dontwarn org.w3c.dom.Location
 -dontwarn org.w3c.dom.Window
--dontwarn org.slf4j.**
-
 
 #-libraryjars '<rtjar>'
 #-libraryjars '<jssejar>'
