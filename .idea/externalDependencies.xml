@@ -7,5 +7,6 @@
     <plugin id="com.intellij.copyright" />
     <plugin id="com.intellij.uiDesigner" />
     <plugin id="com.jetbrains.intellij.api.watcher" min-version="6.37.0" />
+    <plugin id="org.jetbrains.bunch.tool.idea.plugin" min-version="1.0.7" />
   </component>
 </project>
