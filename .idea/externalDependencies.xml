@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ExternalDependencies">
+    <plugin id="DevKit" />
+    <plugin id="Git4Idea" />
+    <plugin id="JUnit" />
+    <plugin id="com.intellij.copyright" />
+    <plugin id="com.intellij.uiDesigner" />
+    <plugin id="com.jetbrains.intellij.api.watcher" min-version="6.37.0" />
+  </component>
+</project>
