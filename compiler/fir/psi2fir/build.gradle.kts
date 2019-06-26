@@ -27,6 +27,11 @@ dependencies {
     testRuntime(project(":kotlin-reflect"))
 
     Platform[192].orHigher {
+        // Warn! unresolved supertypes:
+        // com.intellij.psi.PsiClassOwner,
+        // com.intellij.psi.PsiModifiableCodeBlock,
+        // com.intellij.psi.JavaCodeFragment
+        // com.intellij.psi.PsiModifiableCodeBlock
         testCompileOnly(intellijCoreDep()) { includeJars("intellij-core") }
         testRuntimeOnly(intellijCoreDep()) { includeJars("intellij-core") }
     }

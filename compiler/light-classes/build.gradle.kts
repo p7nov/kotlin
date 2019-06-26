@@ -12,6 +12,7 @@ dependencies {
     compileOnly(intellijCoreDep()) { includeJars("intellij-core") }
 
     Platform[192].orHigher {
+        // Warn! RowIcon can't be found during compilation
         compileOnly(intellijDep()) { includeJars("platform-core-ui", "platform-util-ui") }
     }
     
