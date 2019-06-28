@@ -131,6 +131,6 @@ class KtLightPsiNameValuePair private constructor(
 
     override fun getValue(): PsiAnnotationMemberValue? = _value
 
-    override fun getLiteralValue(): String? = (getValue() as? PsiLiteralExpression)?.value?.toString()
+    override fun getLiteralValue(): String? = (value as? PsiLiteralExpression)?.value?.toString()
 
 }
