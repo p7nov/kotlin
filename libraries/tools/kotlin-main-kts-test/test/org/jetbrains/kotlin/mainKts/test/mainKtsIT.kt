@@ -6,9 +6,13 @@
 package org.jetbrains.kotlin.mainKts.test
 
 import junit.framework.Assert.*
+import org.jetbrains.kotlin.cli.common.CLITool
+import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import org.junit.Test
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
+import java.io.PrintStream
 import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
@@ -88,8 +92,61 @@ class mainKtsIT {
         }
     }
 
+    private fun runWithK2JVMCompiler(
+        scriptPath: String,
+        expectedOutPatterns: List<String> = emptyList(),
+        expectedExitCode: Int = 0
+    ) {
+        val mainKtsJar = File("dist/kotlinc/lib/kotlin-main-kts.jar")
+        assertTrue("kotlin-main-kts.jar not found, run dist task: ${mainKtsJar.absolutePath}", mainKtsJar.exists())
+
+        val (out, err, ret) = captureOutErrRet {
+            CLITool.doMainNoExit(K2JVMCompiler(), arrayOf("-kotlin-home", "dist/kotlinc", "-cp", mainKtsJar.absolutePath, "-script", scriptPath))
+        }
+        try {
+            val outLines = out.lines()
+            assertEquals(expectedOutPatterns.size, outLines.size)
+            for (i in 0 until expectedOutPatterns.size) {
+                val expectedPattern = expectedOutPatterns[i]
+                val actualLine = outLines[i]
+                assertTrue(
+                    "line \"$actualLine\" do not match with expected pattern \"$expectedPattern\"",
+                    Regex(expectedPattern).matches(actualLine)
+                )
+            }
+            assertEquals(expectedExitCode, ret.code)
+        } catch (e: Throwable) {
+            println("OUT:\n$out")
+            println("ERR:\n$err")
+            throw e
+        }
+    }
+
     @Test
     fun testResolveJunit() {
         runWithKotlinc("$TEST_DATA_ROOT/hello-resolve-junit.main.kts", listOf("Hello, World!"))
     }
+
+    @Test
+    fun testImport() {
+        runWithK2JVMCompiler("$TEST_DATA_ROOT/import-test.main.kts", listOf("Hi from common", "Hi from middle", "sharedVar == 5"))
+    }
+}
+
+internal fun <T> captureOutErrRet(body: () -> T): Triple<String, String, T> {
+    val outStream = ByteArrayOutputStream()
+    val errStream = ByteArrayOutputStream()
+    val prevOut = System.out
+    val prevErr = System.err
+    System.setOut(PrintStream(outStream))
+    System.setErr(PrintStream(errStream))
+    val ret = try {
+        body()
+    } finally {
+        System.out.flush()
+        System.err.flush()
+        System.setOut(prevOut)
+        System.setErr(prevErr)
+    }
+    return Triple(outStream.toString().trim(), errStream.toString().trim(), ret)
 }
