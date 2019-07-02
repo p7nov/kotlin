@@ -5,6 +5,19 @@
 
 package org.jetbrains.kotlin.idea.perf
 
+import com.intellij.codeInsight.daemon.DaemonAnalyzerTestCase
+import com.intellij.codeInsight.daemon.ImplicitUsageProvider
+import com.intellij.codeInsight.daemon.ProblemHighlightFilter
+import com.intellij.lang.ExternalAnnotatorsFilter
+import com.intellij.lang.LanguageAnnotators
+import com.intellij.lang.StdLanguages
+import com.intellij.lang.injection.InjectedLanguageManager
+import com.intellij.lang.java.JavaLanguage
+import com.intellij.psi.impl.search.IndexPatternBuilder
+import com.intellij.psi.xml.XmlFileNSInfoProvider
+import com.intellij.xml.XmlSchemaProvider
+import org.jetbrains.kotlin.idea.KotlinLanguage
+import org.jetbrains.kotlin.idea.core.script.ScriptDefinitionsManager
 import org.junit.AfterClass
 import org.junit.BeforeClass
 
@@ -63,6 +76,40 @@ class PerformanceProjectsTest : AbstractPerformanceProjectsTest() {
                 perfHighlightFile("compiler/psi/src/org/jetbrains/kotlin/psi/KtFile.kt", stats = it)
 
                 perfHighlightFile("compiler/psi/src/org/jetbrains/kotlin/psi/KtElement.kt", stats = it)
+            }
+        }
+    }
+
+    //@Ignore("WIP: perfTestProject has to be imported via gradle etc")
+    fun testKotlinProjectHighlightBuildGradle() {
+        tcSuite("Kotlin project highlight build gradle") {
+            val stats = Stats("kotlin project highlight build gradle")
+            stats.use {
+                perfOpenProject("perfTestProject", stats = it, path = "..")
+
+                InjectedLanguageManager.getInstance(myProject) // zillion of Dom Sem classes
+                LanguageAnnotators.INSTANCE.allForLanguage(JavaLanguage.INSTANCE) // pile of annotator classes loads
+                LanguageAnnotators.INSTANCE.allForLanguage(StdLanguages.XML)
+                LanguageAnnotators.INSTANCE.allForLanguage(KotlinLanguage.INSTANCE)
+                DaemonAnalyzerTestCase.assertTrue(
+                    "side effect: to load extensions",
+                    ProblemHighlightFilter.EP_NAME.extensions.toMutableList()
+                        .plus(ImplicitUsageProvider.EP_NAME.extensions)
+                        .plus(XmlSchemaProvider.EP_NAME.extensions)
+                        .plus(XmlFileNSInfoProvider.EP_NAME.extensions)
+                        .plus(ExternalAnnotatorsFilter.EXTENSION_POINT_NAME.extensions)
+                        .plus(IndexPatternBuilder.EP_NAME.extensions).isNotEmpty()
+                )
+                // side effect: to load script definitions"
+                val scriptDefinitionsManager = ScriptDefinitionsManager.getInstance(myProject!!)
+                scriptDefinitionsManager.getAllDefinitions()
+                dispatchAllInvocationEvents()
+                assertTrue(scriptDefinitionsManager.isReady())
+
+                perfFileAnalysis("build.gradle.kts", stats = it)
+                perfFileAnalysis("idea/build.gradle.kts", stats = it)
+                perfFileAnalysis("gradle/jps.gradle.kts", stats = it)
+                perfFileAnalysis("gradle/versions.gradle.kts", stats = it)
             }
         }
     }
