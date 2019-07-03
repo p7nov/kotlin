@@ -90,8 +90,11 @@ private fun loadClass(classLoader: ClassLoader, packageName: String, className: 
     }
 
     var fqName = "$packageName.${className.replace('.', '$')}"
-    repeat(arrayDimensions) {
-        fqName = "[$fqName"
+    if (arrayDimensions > 0) {
+        fqName = "L$fqName;"
+        repeat(arrayDimensions) {
+            fqName = "[$fqName"
+        }
     }
 
     return classLoader.tryLoadClass(fqName)

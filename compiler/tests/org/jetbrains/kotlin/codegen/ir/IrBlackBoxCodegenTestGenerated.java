@@ -18963,6 +18963,11 @@ public class IrBlackBoxCodegenTestGenerated extends AbstractIrBlackBoxCodegenTes
                     KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/codegen/box/reflection/annotations/onTypes"), Pattern.compile("^(.+)\\.kt$"), TargetBackend.JVM_IR, true);
                 }
 
+                @TestMetadata("arrayKClass.kt")
+                public void testArrayKClass() throws Exception {
+                    runTest("compiler/testData/codegen/box/reflection/annotations/onTypes/arrayKClass.kt");
+                }
+
                 @TestMetadata("classLiteralWithExpectedType.kt")
                 public void testClassLiteralWithExpectedType() throws Exception {
                     runTest("compiler/testData/codegen/box/reflection/annotations/onTypes/classLiteralWithExpectedType.kt");
