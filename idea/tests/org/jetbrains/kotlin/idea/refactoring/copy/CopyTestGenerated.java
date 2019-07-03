@@ -59,9 +59,9 @@ public class CopyTestGenerated extends AbstractCopyTest {
         runTest("idea/testData/refactoring/copy/copyClassWithRename/copyClassWithRename.test");
     }
 
-    @TestMetadata("copyFIleFromDefaultPackage/copyFIleFromDefaultPackage.test")
-    public void testCopyFIleFromDefaultPackage_CopyFIleFromDefaultPackage() throws Exception {
-        runTest("idea/testData/refactoring/copy/copyFIleFromDefaultPackage/copyFIleFromDefaultPackage.test");
+    @TestMetadata("copyFileFromDefaultPackage/copyFileFromDefaultPackage.test")
+    public void testCopyFileFromDefaultPackage_CopyFileFromDefaultPackage() throws Exception {
+        runTest("idea/testData/refactoring/copy/copyFileFromDefaultPackage/copyFileFromDefaultPackage.test");
     }
 
     @TestMetadata("copyFileFromDefaultPackageToDefaultPackage/copyFIleToDefaultPackage.test")
@@ -69,19 +69,19 @@ public class CopyTestGenerated extends AbstractCopyTest {
         runTest("idea/testData/refactoring/copy/copyFileFromDefaultPackageToDefaultPackage/copyFIleToDefaultPackage.test");
     }
 
-    @TestMetadata("copyFIleRetainContent/copyFIleRetainContent.test")
-    public void testCopyFIleRetainContent_CopyFIleRetainContent() throws Exception {
-        runTest("idea/testData/refactoring/copy/copyFIleRetainContent/copyFIleRetainContent.test");
+    @TestMetadata("copyFileRetainContent/copyFileRetainContent.test")
+    public void testCopyFileRetainContent_CopyFileRetainContent() throws Exception {
+        runTest("idea/testData/refactoring/copy/copyFileRetainContent/copyFileRetainContent.test");
     }
 
-    @TestMetadata("copyFIleToDefaultPackage/copyFIleToDefaultPackage.test")
-    public void testCopyFIleToDefaultPackage_CopyFIleToDefaultPackage() throws Exception {
-        runTest("idea/testData/refactoring/copy/copyFIleToDefaultPackage/copyFIleToDefaultPackage.test");
+    @TestMetadata("copyFileToDefaultPackage/copyFileToDefaultPackage.test")
+    public void testCopyFileToDefaultPackage_CopyFileToDefaultPackage() throws Exception {
+        runTest("idea/testData/refactoring/copy/copyFileToDefaultPackage/copyFileToDefaultPackage.test");
     }
 
-    @TestMetadata("copyFIleWithPackageAndDirUnmatched/copyFIleWithPackageAndDirUnmatched.test")
-    public void testCopyFIleWithPackageAndDirUnmatched_CopyFIleWithPackageAndDirUnmatched() throws Exception {
-        runTest("idea/testData/refactoring/copy/copyFIleWithPackageAndDirUnmatched/copyFIleWithPackageAndDirUnmatched.test");
+    @TestMetadata("copyFileWithPackageAndDirUnmatched/copyFileWithPackageAndDirUnmatched.test")
+    public void testCopyFileWithPackageAndDirUnmatched_CopyFileWithPackageAndDirUnmatched() throws Exception {
+        runTest("idea/testData/refactoring/copy/copyFileWithPackageAndDirUnmatched/copyFileWithPackageAndDirUnmatched.test");
     }
 
     @TestMetadata("copyFunCallQualificationWithParentheses/copyFunCallQualificationWithParentheses.test")
