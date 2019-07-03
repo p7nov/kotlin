@@ -788,3 +788,10 @@ tasks.create("findShadowJarsInClasspath").doLast {
         project.checkConfig("testCompileClasspath")
     }
 }
+
+tasks.create("dumpJavaTasksSettings").doLast {
+    val javaTasks = allprojects.flatMap { it.tasks.filterIsInstance<JavaCompile>() }.sortedBy { it.path }.joinToString("\n") {
+        "${it.path} sourceCompatibility=${it.sourceCompatibility} targetCompatibility=${it.targetCompatibility} javaHome=${it.options.forkOptions.javaHome}"
+    }
+    file("java-tasks-settings.txt").writeText(javaTasks)
+}
