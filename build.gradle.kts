@@ -723,16 +723,8 @@ fun Project.configureJvmProject(javaHome: String, javaVersion: String) {
         if (name != "compileJava9Java") {
             sourceCompatibility = javaVersion
             targetCompatibility = javaVersion
-
-            if (shouldFork) {
-                logger.info("$path will be forked with $javaHome")
-                options.isFork = true
-                options.forkOptions.javaHome = file(javaHome)
-            } else {
-                options.isFork = false
-                options.forkOptions.javaHome = null
-            }
-
+            options.isFork = shouldFork
+            options.forkOptions.javaHome = file(javaHome)
             options.compilerArgs.add("-proc:none")
             options.encoding = "UTF-8"
         }
