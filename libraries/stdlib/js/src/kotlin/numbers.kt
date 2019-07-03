@@ -187,24 +187,14 @@ public actual fun Long.takeLowestOneBit(): Long =
 @SinceKotlin("1.3")
 @ExperimentalStdlibApi
 public actual fun Long.rotateLeft(bitCount: Int): Long {
-    val numBits = bitCount and 63
-    val low = this.low
-    val high = this.high
-    return when {
-        numBits == 0 ->
-            this
-        numBits < 32 ->
-            Long(
-                low.shl(numBits) or high.ushr(32 - numBits),
-                high.shl(numBits) or low.ushr(32 - numBits)
-            )
-        numBits == 32 ->
-            Long(high, low)
-        else ->
-            Long(
-                low.ushr(64 - numBits) or high.shl(numBits - 32),
-                high.ushr(64 - numBits) or low.shl(numBits - 32)
-            )
+    if ((bitCount and 31) != 0) {
+        val low = this.low
+        val high = this.high
+        val newLow = low.shl(bitCount) or high.ushr(-bitCount)
+        val newHigh = high.shl(bitCount) or low.ushr(-bitCount)
+        return if ((bitCount and 32) == 0) Long(newLow, newHigh) else Long(newHigh, newLow)
+    } else {
+        return if ((bitCount and 32) == 0) this else Long(high, low)
     }
 }
 
