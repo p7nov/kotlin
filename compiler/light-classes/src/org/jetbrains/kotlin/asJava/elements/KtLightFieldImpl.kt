@@ -25,6 +25,7 @@ import org.jetbrains.kotlin.asJava.classes.KtLightClass
 import org.jetbrains.kotlin.asJava.classes.KtLightClassForEnumEntry
 import org.jetbrains.kotlin.asJava.classes.cannotModify
 import org.jetbrains.kotlin.asJava.classes.lazyPub
+import org.jetbrains.kotlin.psi.KtDeclaration
 import org.jetbrains.kotlin.psi.KtEnumEntry
 import org.jetbrains.kotlin.psi.KtNamedDeclaration
 import java.lang.UnsupportedOperationException
@@ -103,7 +104,8 @@ sealed class KtLightFieldImpl<D : PsiField>(
     }
 
     class KtLightFieldForDeclaration(origin: LightMemberOrigin?, computeDelegate: () -> PsiField, containingClass: KtLightClass, dummyDelegate: PsiField?) :
-            KtLightFieldImpl<PsiField>(origin, computeDelegate, containingClass, dummyDelegate)
+        KtLightFieldImpl<PsiField>(origin, computeDelegate, containingClass, dummyDelegate),
+        KtLightFieldForDeclarationSupport
 
     companion object Factory {
         fun create(origin: LightMemberOrigin?, delegate: PsiField, containingClass: KtLightClass): KtLightField = when (delegate) {
