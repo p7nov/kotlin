@@ -298,7 +298,6 @@ fun Task.listConfigurationContents(configName: String) {
 }
 
 val defaultJvmTarget = "1.8"
-val defaultJavaHome = jdkPath(defaultJvmTarget)
 val ignoreTestFailures by extra(project.findProperty("ignoreTestFailures")?.toString()?.toBoolean() ?: project.hasProperty("teamcity"))
 
 allprojects {
@@ -306,7 +305,6 @@ allprojects {
     configurations.maybeCreate("embedded")
 
     jvmTarget = defaultJvmTarget
-    javaHome = defaultJavaHome
 
     // There are problems with common build dir:
     //  - some tests (in particular js and binary-compatibility-validator depend on the fixed (default) location
@@ -368,8 +366,7 @@ allprojects {
     task("listDistJar") { listConfigurationContents("distJar") }
 
     afterEvaluate {
-        logger.info("configuring project $name to compile to the target jvm version $jvmTarget using jdk: $javaHome")
-        configureJvmProject(javaHome!!, jvmTarget!!)
+        configureJvmProject()
 
         fun File.toProjectRootRelativePathOrSelf() = (relativeToOrNull(rootDir)?.takeUnless { it.startsWith("..") } ?: this).path
 
@@ -708,36 +705,43 @@ configure<IdeaModel> {
     }
 }
 
+val jdkPathByVersionCache = HashMap<String, String>()
 fun jdkPath(version: String): String {
-    val jdkName = "JDK_${version.replace(".", "")}"
-    val jdkMajorVersion = JdkMajorVersion.valueOf(jdkName)
-    return configuredJdks.find { it.majorVersion == jdkMajorVersion }?.homeDir?.canonicalPath ?: jdkNotFoundConst
+    return jdkPathByVersionCache.getOrPut(version) {
+        val jdkName = "JDK_${version.replace(".", "")}"
+        val jdkMajorVersion = JdkMajorVersion.valueOf(jdkName)
+        configuredJdks.find { it.majorVersion == jdkMajorVersion }?.homeDir?.canonicalPath ?: jdkNotFoundConst
+    }
 }
 
+fun Project.configureJvmProject() {
+    val jvmTargetVersion = jvmTarget!!
+    val jvmTargetHome = file(jdkPath(jvmTargetVersion))
+    val jvmTargetHomePath = jvmTargetHome.canonicalPath
+    logger.info("configuring project $name to compile to the target jvm version $jvmTargetVersion using jdk: $jvmTargetHome")
 
-fun Project.configureJvmProject(javaHome: String, javaVersion: String) {
     val currentJavaHome = File(System.getProperty("java.home")!!).canonicalPath
-    val shouldFork = !currentJavaHome.startsWith(File(javaHome).canonicalPath)
+    val shouldFork = !currentJavaHome.startsWith(jvmTargetHomePath)
 
     tasks.withType<JavaCompile> {
         if (name != "compileJava9Java") {
-            sourceCompatibility = javaVersion
-            targetCompatibility = javaVersion
+            sourceCompatibility = jvmTargetVersion
+            targetCompatibility = jvmTargetVersion
             options.isFork = shouldFork
-            options.forkOptions.javaHome = file(javaHome)
+            options.forkOptions.javaHome = jvmTargetHome
             options.compilerArgs.add("-proc:none")
             options.encoding = "UTF-8"
         }
     }
 
     tasks.withType<KotlinCompile> {
-        kotlinOptions.jdkHome = javaHome
-        kotlinOptions.jvmTarget = javaVersion
+        kotlinOptions.jdkHome = jvmTargetHomePath
+        kotlinOptions.jvmTarget = jvmTargetVersion
         kotlinOptions.freeCompilerArgs += "-Xjvm-default=compatibility"
     }
 
     tasks.withType<Test> {
-        executable = File(javaHome, "bin/java").canonicalPath
+        executable = File(jvmTargetHome, "bin/java").canonicalPath
     }
 }
 

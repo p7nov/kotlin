@@ -46,12 +46,6 @@ var Project.jvmTarget: String?
         extra["jvmTarget"] = v
     }
 
-var Project.javaHome: String?
-    get() = extra.takeIf { it.has("javaHome") }?.get("javaHome") as? String
-    set(v) {
-        extra["javaHome"] = v
-    }
-
 fun Project.generator(fqName: String, sourceSet: SourceSet? = null) = smartJavaExec {
     classpath = (sourceSet ?: testSourceSet).runtimeClasspath
     main = fqName
