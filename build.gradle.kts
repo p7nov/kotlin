@@ -790,8 +790,10 @@ tasks.create("findShadowJarsInClasspath").doLast {
 }
 
 tasks.create("dumpJavaTasksSettings").doLast {
-    val javaTasks = allprojects.flatMap { it.tasks.filterIsInstance<JavaCompile>() }.sortedBy { it.path }.joinToString("\n") {
-        "${it.path} sourceCompatibility=${it.sourceCompatibility} targetCompatibility=${it.targetCompatibility} javaHome=${it.options.forkOptions.javaHome}"
+    val tasks = allprojects.flatMap { it.tasks.filterIsInstance<JavaCompile>() }.sortedBy { it.path }
+    val maxTaskPathLength = tasks.map { it.path.length }.max()!!
+    val text = tasks.joinToString("\n") {
+        "${it.path.padEnd(maxTaskPathLength, ' ')} source=${it.sourceCompatibility} target=${it.targetCompatibility} javaHome=${it.options.forkOptions.javaHome}"
     }
-    file("java-tasks-settings.txt").writeText(javaTasks)
+    file("java-tasks-settings.txt").writeText(text)
 }
