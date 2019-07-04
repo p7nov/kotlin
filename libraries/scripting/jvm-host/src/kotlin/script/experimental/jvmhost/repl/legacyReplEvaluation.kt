@@ -65,7 +65,7 @@ class JvmReplEvaluator(
                     else
                         ReplEvalResult.UnitResult()
                 }
-                is ResultValue.UnitValue -> {
+                is ResultValue.Unit -> {
                     history.replaceOrPush(compileResult.lineId, retVal.scriptInstance)
                     ReplEvalResult.UnitResult()
                 }

@@ -108,12 +108,15 @@ open class GenericReplEvaluator(
 
             historyActor.addFinal(compileResult.lineId, EvalClassWithInstanceAndLoader(scriptClass.kotlin, scriptInstance, classLoader, invokeWrapper))
 
-            val resultFieldName = scriptResultFieldName(compileResult.lineId.no)
-            val resultField = scriptClass.getDeclaredField(resultFieldName).apply { isAccessible = true }
-            val resultValue: Any? = resultField.get(scriptInstance)
+            return if (compileResult.hasResult) {
+                val resultFieldName = scriptResultFieldName(compileResult.lineId.no)
+                val resultField = scriptClass.declaredFields.find { it.name == resultFieldName }?.apply { isAccessible = true }
+                val resultValue: Any? = resultField?.get(scriptInstance)
 
-            return if (compileResult.hasResult) ReplEvalResult.ValueResult(resultFieldName, resultValue, compileResult.type)
-            else ReplEvalResult.UnitResult()
+                ReplEvalResult.ValueResult(resultFieldName, resultValue, compileResult.type)
+            } else {
+                ReplEvalResult.UnitResult()
+            }
         }
     }
 }

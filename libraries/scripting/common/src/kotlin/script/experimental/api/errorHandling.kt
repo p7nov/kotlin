@@ -7,7 +7,9 @@
 
 package kotlin.script.experimental.api
 
+import com.sun.xml.internal.messaging.saaj.util.ByteOutputStream
 import java.io.File
+import java.io.PrintStream
 
 /**
  * The single script diagnostic report
@@ -28,11 +30,20 @@ data class ScriptDiagnostic(
      */
     enum class Severity { FATAL, ERROR, WARNING, INFO, DEBUG }
 
-    override fun toString(): String = buildString {
-        append(severity.name)
-        append(' ')
+    override fun toString(): String = render()
+
+    fun render(
+        withSeverity: Boolean = true,
+        withLocation: Boolean = true,
+        withException: Boolean = true,
+        withStackTrace: Boolean = false
+    ): String = buildString {
+        if (withSeverity) {
+            append(severity.name)
+            append(' ')
+        }
         append(message)
-        if (sourcePath != null || location != null) {
+        if (withLocation && (sourcePath != null || location != null)) {
             append(" (")
             sourcePath?.let { append(it.substringAfterLast(File.separatorChar)) }
             location?.let {
@@ -43,9 +54,18 @@ data class ScriptDiagnostic(
             }
             append(')')
         }
-        if (exception != null) {
+        if (withException && exception != null) {
             append(": ")
             append(exception)
+            if (withStackTrace) {
+                ByteOutputStream().use { os ->
+                    val ps = PrintStream(os)
+                    exception.printStackTrace(ps)
+                    ps.flush()
+                    append("\n")
+                    append(os.toString())
+                }
+            }
         }
     }
 }

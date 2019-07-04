@@ -64,7 +64,7 @@ class ReplTest : TestCase() {
                 .onSuccess {
                     val snippetInstance = when (val retVal = it.returnValue) {
                         is ResultValue.Value -> retVal.scriptInstance
-                        is ResultValue.UnitValue -> retVal.scriptInstance
+                        is ResultValue.Unit -> retVal.scriptInstance
                         else -> throw IllegalStateException("Expecting value with script instance, got $it")
                     }
                     currentEvalConfig = ScriptEvaluationConfiguration(currentEvalConfig) {
