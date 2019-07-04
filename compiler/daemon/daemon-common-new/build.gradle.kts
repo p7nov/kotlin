@@ -14,7 +14,7 @@ plugins {
     id("jps-compatible")
 }
 
-jvmTarget = "1.6"
+JvmProject.configure(project, "1.6")
 
 val ktorExcludesForDaemon : List<Pair<String, String>> by rootProject.extra
 

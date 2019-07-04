@@ -11,6 +11,8 @@ pill {
     variant = PillExtension.Variant.FULL
 }
 
+JvmProject.configure(project, "1.8")
+
 val kotlinGradlePluginTest = project(":kotlin-gradle-plugin").sourceSets.getByName("test")
 
 dependencies {
@@ -113,15 +115,8 @@ gradle.taskGraph.whenReady {
     }
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jdkHome = rootProject.extra["JDK_18"] as String
-    kotlinOptions.jvmTarget = "1.8"
-}
-
 tasks.withType<Test> {
     onlyIf { !project.hasProperty("noTest") }
-
-    executable = "${rootProject.extra["JDK_18"]!!}/bin/java"
 
     systemProperty("kotlinVersion", rootProject.extra["kotlinVersion"] as String)
     systemProperty("runnerGradleVersion", gradle.gradleVersion)

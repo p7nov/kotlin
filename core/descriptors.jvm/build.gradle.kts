@@ -3,8 +3,7 @@ plugins {
     id("jps-compatible")
 }
 
-jvmTarget = "1.6"
-javaHome = rootProject.extra["JDK_16"] as String
+JvmProject.configure(project, "1.6")
 
 dependencies {
     compile(project(":kotlin-annotations-jvm"))
@@ -18,9 +17,4 @@ dependencies {
 sourceSets {
     "main" { projectDefault() }
     "test" {}
-}
-
-tasks.withType<JavaCompile> {
-    sourceCompatibility = "1.6"
-    targetCompatibility = "1.6"
 }

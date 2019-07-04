@@ -40,12 +40,6 @@ fun fileFrom(root: File, vararg children: String): File = children.fold(root) { 
 
 fun fileFrom(root: String, vararg children: String): File = children.fold(File(root)) { f, c -> File(f, c) }
 
-var Project.jvmTarget: String?
-    get() = extra.takeIf { it.has("jvmTarget") }?.get("jvmTarget") as? String
-    set(v) {
-        extra["jvmTarget"] = v
-    }
-
 fun Project.generator(fqName: String, sourceSet: SourceSet? = null) = smartJavaExec {
     classpath = (sourceSet ?: testSourceSet).runtimeClasspath
     main = fqName

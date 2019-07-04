@@ -21,8 +21,7 @@ group = "org.jetbrains.kotlinx"
 val deployVersion = findProperty("kotlinxMetadataDeployVersion") as String?
 version = deployVersion ?: "0.1-SNAPSHOT"
 
-jvmTarget = "1.6"
-javaHome = rootProject.extra["JDK_16"] as String
+JvmProject.configure(project, "1.6")
 
 sourceSets {
     "main" { projectDefault() }

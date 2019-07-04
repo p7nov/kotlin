@@ -3,7 +3,7 @@ plugins {
     id("jps-compatible")
 }
 
-jvmTarget = "1.8"
+JvmProject.configure(project, "1.8")
 
 dependencies {
     compile(project(":compiler:util"))

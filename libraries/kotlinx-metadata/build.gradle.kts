@@ -5,8 +5,7 @@ plugins {
     id("jps-compatible")
 }
 
-jvmTarget = "1.6"
-javaHome = rootProject.extra["JDK_16"] as String
+JvmProject.configure(project, "1.6")
 
 sourceSets {
     "main" { projectDefault() }

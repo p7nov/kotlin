@@ -5,11 +5,11 @@ plugins {
     id("jps-compatible")
 }
 
+JvmProject.configure(project, "1.6")
+
 dependencies {
     compile(kotlinStdlib())
 }
-
-jvmTarget = "1.6"
 
 sourceSets {
     "main" { projectDefault() }

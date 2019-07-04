@@ -3,7 +3,7 @@ plugins {
     kotlin("jvm")
 }
 
-jvmTarget = "1.6"
+JvmProject.configure(project, "1.6")
 
 val embeddableTestRuntime by configurations.creating
 

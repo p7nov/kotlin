@@ -112,29 +112,40 @@ extra["ideaPluginDir"] = project.file(ideaPluginDir)
 extra["ideaUltimatePluginDir"] = project.file(ideaUltimatePluginDir)
 extra["isSonatypeRelease"] = false
 
-// Work-around necessary to avoid setting null javaHome. Will be removed after support of lazy task configuration
-val jdkNotFoundConst = "JDK NOT FOUND"
+class JdkProvider {
+    // Work-around necessary to avoid setting null javaHome. Will be removed after support of lazy task configuration
+    private val jdkNotFoundConst = "JDK NOT FOUND"
+    private val cache = HashMap<String, String>()
 
-extra["JDK_16"] = jdkPath("1.6")
-extra["JDK_17"] = jdkPath("1.7")
-extra["JDK_18"] = jdkPath("1.8")
-extra["JDK_9"] = jdkPath("9")
-extra["JDK_10"] = jdkPath("10")
-extra["JDK_11"] = jdkPath("11")
+    fun jdkPath(version: String): String = cache.getOrPut(version) {
+        val jdkName = "JDK_${version.replace(".", "")}"
+        val jdkMajorVersion = JdkMajorVersion.valueOf(jdkName)
+        configuredJdks.find { it.majorVersion == jdkMajorVersion }?.homeDir?.canonicalPath ?: jdkNotFoundConst
+    }
+
+    fun checkJDK() {
+        val missingEnvVars = JdkMajorVersion.values()
+            .filter { it.isMandatory() && extra[it.name] == jdkNotFoundConst }
+            .mapTo(ArrayList()) { it.name }
+
+        if (missingEnvVars.isNotEmpty()) {
+            throw GradleException("Required environment variables are missing: ${missingEnvVars.joinToString()}")
+        }
+    }
+}
+
+val jdkProvider = JdkProvider()
+
+extra["JDK_16"] = jdkProvider.jdkPath("1.6")
+extra["JDK_17"] = jdkProvider.jdkPath("1.7")
+extra["JDK_18"] = jdkProvider.jdkPath("1.8")
+extra["JDK_9"] = jdkProvider.jdkPath("9")
+extra["JDK_10"] = jdkProvider.jdkPath("10")
+extra["JDK_11"] = jdkProvider.jdkPath("11")
 
 // allow opening the project without setting up all env variables (see KT-26413)
 if (!kotlinBuildProperties.isInIdeaSync) {
-    checkJDK()
-}
-
-fun checkJDK() {
-    val missingEnvVars = JdkMajorVersion.values()
-        .filter { it.isMandatory() && extra[it.name] == jdkNotFoundConst }
-        .mapTo(ArrayList()) { it.name }
-
-    if (missingEnvVars.isNotEmpty()) {
-        throw GradleException("Required environment variables are missing: ${missingEnvVars.joinToString()}")
-    }
+    jdkProvider.checkJDK()
 }
 
 rootProject.apply {
@@ -297,14 +308,21 @@ fun Task.listConfigurationContents(configName: String) {
     }
 }
 
-val defaultJvmTarget = "1.8"
 val ignoreTestFailures by extra(project.findProperty("ignoreTestFailures")?.toString()?.toBoolean() ?: project.hasProperty("teamcity"))
 
+val nonConfiguredJvmProjects = LinkedHashSet<Project>()
+gradle.taskGraph.whenReady {
+    if (nonConfiguredJvmProjects.isNotEmpty()) {
+        val msg = buildString {
+            appendln("The following JVM projects are not configured properly:")
+            nonConfiguredJvmProjects.forEach { appendln("  ${it.path}") }
+            appendln("Call 'JvmProject.configure(TARGET_JVM_VERSION)' in the scripts to fix the issue")
+        }
+    }
+}
+
 allprojects {
-
     configurations.maybeCreate("embedded")
-
-    jvmTarget = defaultJvmTarget
 
     // There are problems with common build dir:
     //  - some tests (in particular js and binary-compatibility-validator depend on the fixed (default) location
@@ -366,7 +384,9 @@ allprojects {
     task("listDistJar") { listConfigurationContents("distJar") }
 
     afterEvaluate {
-        configureJvmProject()
+        if (plugins.hasPlugin("java") && !JvmProject.isConfigured(this)) {
+            nonConfiguredJvmProjects.add(this)
+        }
 
         fun File.toProjectRootRelativePathOrSelf() = (relativeToOrNull(rootDir)?.takeUnless { it.startsWith("..") } ?: this).path
 
@@ -705,18 +725,8 @@ configure<IdeaModel> {
     }
 }
 
-val jdkPathByVersionCache = HashMap<String, String>()
-fun jdkPath(version: String): String {
-    return jdkPathByVersionCache.getOrPut(version) {
-        val jdkName = "JDK_${version.replace(".", "")}"
-        val jdkMajorVersion = JdkMajorVersion.valueOf(jdkName)
-        configuredJdks.find { it.majorVersion == jdkMajorVersion }?.homeDir?.canonicalPath ?: jdkNotFoundConst
-    }
-}
-
-fun Project.configureJvmProject() {
-    val jvmTargetVersion = jvmTarget!!
-    val jvmTargetHome = file(jdkPath(jvmTargetVersion))
+configureJvmProjectImpl = fun Project.(jvmTargetVersion: String) {
+    val jvmTargetHome = file(jdkProvider.jdkPath(jvmTargetVersion))
     val jvmTargetHomePath = jvmTargetHome.canonicalPath
     logger.info("configuring project $name to compile to the target jvm version $jvmTargetVersion using jdk: $jvmTargetHome")
 

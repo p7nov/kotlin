@@ -3,10 +3,8 @@ description = 'Kotlin Standard Library JDK 8 extension'
 apply plugin: 'kotlin'
 apply plugin: 'pill-configurable'
 
-configureJvm6Project(project)
+JvmProject.configure(project, "1.8")
 configurePublishing(project)
-ext.javaHome = JDK_18
-ext.jvmTarget = "1.8"
 
 pill {
     importAsLibrary = true
@@ -59,18 +57,11 @@ task modularJar(type: Jar) {
 
 
 artifacts {
-    archives sourcesJar
-    sources sourcesJar
-
     archives modularJar
 }
 
+sourcesJar()
 javadocJar()
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-    kotlinOptions.jdkHome = JDK_18
-    kotlinOptions.jvmTarget = 1.8
-}
 
 compileKotlin {
     kotlinOptions.freeCompilerArgs = [

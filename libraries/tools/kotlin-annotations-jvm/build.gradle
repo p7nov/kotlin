@@ -3,7 +3,7 @@ description = 'Kotlin annotations for JVM'
 apply plugin: 'kotlin'
 apply plugin: 'pill-configurable'
 
-configureJvm6Project(project)
+JvmProject.configure(project, "1.6")
 configurePublishing(project)
 
 pill {
@@ -22,17 +22,8 @@ dependencies {
     compile DependenciesKt.kotlinBuiltins(project)
 }
 
-artifacts {
-    archives sourcesJar
-    sources sourcesJar
-}
-
+sourcesJar()
 javadocJar()
-
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-    kotlinOptions.jdkHome = JDK_16
-    kotlinOptions.jvmTarget = 1.6
-}
 
 compileKotlin {
     kotlinOptions.freeCompilerArgs = [

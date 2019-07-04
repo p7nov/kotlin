@@ -4,6 +4,8 @@ plugins {
     kotlin("jvm")
 }
 
+JvmProject.configure(project, "1.6")
+
 dependencies {
     compileOnly(project(":core:util.runtime"))
     compileOnly(project(":core:descriptors"))
@@ -23,9 +25,6 @@ sourceSets {
     "main" { projectDefault() }
     "test" { projectDefault() }
 }
-
-jvmTarget = "1.6"
-javaHome = rootProject.extra["JDK_16"] as String
 
 val generateTests by generator("org.jetbrains.kotlin.generators.tests.GenerateRuntimeDescriptorTestsKt")
 

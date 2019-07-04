@@ -1,14 +1,8 @@
 apply plugin: 'kotlin'
 apply plugin: 'jps-compatible'
 
-configureJvmProject(project)
+JvmProject.configure(project, "1.8")
 configurePublishing(project)
-
-compileJava {
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-    options.fork = false
-}
 
 pill {
     variant = 'FULL'
@@ -42,10 +36,5 @@ jar {
 
 ArtifactsKt.runtimeJar(project, EmbeddableKt.rewriteDepsToShadedCompiler(project, jar, {}), {})
 
-artifacts {
-    archives sourcesJar
-}
-
+sourcesJar()
 javadocJar()
-
-test.executable = "${JDK_18}/bin/java"

@@ -24,7 +24,7 @@ plugins {
     id("pill-configurable")
 }
 
-callGroovy("configureJavaOnlyJvm6Project", this)
+JvmProject.configure(project, "1.6")
 publish()
 
 pill {

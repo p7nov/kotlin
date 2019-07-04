@@ -7,8 +7,7 @@ plugins {
     `maven-publish`
 }
 
-jvmTarget = "1.6"
-javaHome = rootProject.extra["JDK_16"] as String
+JvmProject.configure(project, "1.6")
 
 val builtins by configurations.creating
 
@@ -45,11 +44,6 @@ val copySources by task<Sync> {
                  "kotlin/contracts/ContractBuilder.kt",
                  "kotlin/contracts/Effect.kt")
     into(File(buildDir, "src"))
-}
-
-tasks.withType<JavaCompile> {
-    sourceCompatibility = "1.6"
-    targetCompatibility = "1.6"
 }
 
 tasks.withType<KotlinCompile> {
