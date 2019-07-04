@@ -1,4 +1,3 @@
-// WITH_RUNTIME
 class Test {
     val test = run {<caret>foo()
 
@@ -7,7 +6,6 @@ class Test {
     }
 }
 //-----
-// WITH_RUNTIME
 class Test {
     val test = run {
         <caret>foo()

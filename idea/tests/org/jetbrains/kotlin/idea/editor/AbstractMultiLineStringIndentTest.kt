@@ -69,18 +69,4 @@ abstract class AbstractMultiLineStringIndentTest : KotlinLightCodeInsightFixture
             CodeStyle.getSettings(file).clearCodeStyleSettings()
         }
     }
-
-    override fun getProjectDescriptor(): LightProjectDescriptor {
-        if (isAllFilesPresentInTest()) return KotlinLightProjectDescriptor.INSTANCE
-        return try {
-            val fileText = FileUtil.loadFile(File(testDataPath, fileName()), true)
-            if (InTextDirectivesUtils.isDirectiveDefined(fileText, "WITH_RUNTIME")) {
-                KotlinWithJdkAndRuntimeLightProjectDescriptor.INSTANCE
-            } else {
-                JAVA_LATEST!!
-            }
-        } catch (e: IOException) {
-            throw rethrow(e)
-        }
-    }    
 }
