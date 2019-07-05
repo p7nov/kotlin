@@ -195,11 +195,3 @@ fun ResolutionFacade.resolveImportReference(
     return qualifiedExpressionResolver.processImportReference(
             importDirective, moduleDescriptor, BindingTraceContext(), excludedImportNames = emptyList(), packageFragmentForVisibilityCheck = null)?.getContributedDescriptors() ?: emptyList()
 }
-
-@Suppress("DEPRECATION")
-@Deprecated(
-    "This method is going to be removed in 1.3.0 release",
-    ReplaceWith("analyzeWithAllCompilerChecks().bindingContext"),
-    DeprecationLevel.ERROR
-)
-fun KtElement.analyzeFully(): BindingContext = analyzeWithAllCompilerChecks().bindingContext
