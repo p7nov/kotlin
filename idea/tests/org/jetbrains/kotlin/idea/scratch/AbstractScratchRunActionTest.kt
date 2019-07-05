@@ -217,6 +217,8 @@ abstract class AbstractScratchRunActionTest : FileEditorManagerTestCase() {
     }
 
     override fun tearDown() {
+        val project = myFixture.project
+
         if (myFixture.file != null) {
             val (_, scratchPanel) = getEditorWithScratchPanel(myManager, myFixture.file.virtualFile)
                 ?: error("Couldn't find scratch panel")
@@ -230,6 +232,8 @@ abstract class AbstractScratchRunActionTest : FileEditorManagerTestCase() {
         ScratchFileService.getInstance().scratchesMapping.mappings.forEach { file, _ ->
             runWriteAction { file.delete(this) }
         }
+
+        Assert.assertTrue(project.isDisposed)
     }
 
     companion object {
