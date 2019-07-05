@@ -81,9 +81,10 @@ internal class PerFileAnalysisCache(val file: KtFile, componentProvider: Compone
         val analyzableParent = KotlinResolveDataProvider.findAnalyzableParent(element)
 
         return synchronized<AnalysisResult>(this) {
-
             val cached = lookUp(analyzableParent)
-            if (cached != null) return@synchronized cached
+            if (cached != null) {
+                return@synchronized cached
+            }
 
             val result = analyze(analyzableParent)
 
@@ -182,7 +183,7 @@ private object KotlinResolveDataProvider {
 
             val trace = DelegatingBindingTrace(
                 resolveSession.bindingContext,
-                "Trace for resolution of " + analyzableElement,
+                "Trace for resolution of $analyzableElement",
                 allowSliceRewrite = true
             )
 

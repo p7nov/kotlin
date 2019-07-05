@@ -46,13 +46,12 @@ import org.jetbrains.kotlin.idea.caches.resolve.analyzeWithAllCompilerChecks
 import org.jetbrains.kotlin.idea.inspections.KotlinUniversalQuickFix
 import org.jetbrains.kotlin.idea.quickfix.QuickFixes
 import org.jetbrains.kotlin.idea.references.mainReference
-import org.jetbrains.kotlin.psi.KtFile
-import org.jetbrains.kotlin.psi.KtNameReferenceExpression
-import org.jetbrains.kotlin.psi.KtParameter
-import org.jetbrains.kotlin.psi.KtReferenceExpression
+import org.jetbrains.kotlin.psi.*
+import org.jetbrains.kotlin.psi.psiUtil.parentsWithSelf
 import org.jetbrains.kotlin.resolve.BindingContext
 import org.jetbrains.kotlin.resolve.diagnostics.Diagnostics
 import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 import java.lang.reflect.*
 import java.util.*
 
@@ -63,7 +62,9 @@ open class KotlinPsiChecker : Annotator, HighlightRangeExtension {
 
         if (!KotlinHighlightingUtil.shouldHighlight(file)) return
 
-        val analysisResult = file.analyzeWithAllCompilerChecks()
+        val ktElement = element.parentsWithSelf.firstIsInstanceOrNull<KtElement>() ?: return
+
+        val analysisResult = ktElement.analyzeWithAllCompilerChecks()
         if (analysisResult.isError()) {
             throw ProcessCanceledException(analysisResult.error)
         }

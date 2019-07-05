@@ -114,7 +114,10 @@ public class StubClassBuilder extends AbstractClassBuilder {
             String parentPrefix = getClassInternalNamePrefix((PsiClassStub) parent);
             if (parentPrefix == null) return null;
 
-            assert internalName.startsWith(parentPrefix) : internalName + " : " + parentPrefix;
+            if (!internalName.startsWith(parentPrefix)) {
+                assert false : internalName + " : " + parentPrefix;
+            }
+
             return internalName.substring(parentPrefix.length());
         }
         return null;
