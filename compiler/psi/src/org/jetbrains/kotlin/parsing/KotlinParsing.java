@@ -512,6 +512,10 @@ public class KotlinParsing extends AbstractKotlinParsing {
         return doParseModifierList(null, TYPE_MODIFIER_KEYWORDS, DEFAULT, TokenSet.EMPTY);
     }
 
+    private boolean parseTypeModifierListWithSignificantWhitespace() {
+        return doParseModifierList(null, TYPE_MODIFIER_KEYWORDS, DEFAULT, TokenSet.EMPTY, true);
+    }
+
     private boolean parseTypeArgumentModifierList() {
         return doParseModifierList(null, TYPE_ARGUMENT_MODIFIER_KEYWORDS, NO_ANNOTATIONS, TokenSet.create(COMMA, COLON, GT));
     }
@@ -522,11 +526,21 @@ public class KotlinParsing extends AbstractKotlinParsing {
             @NotNull AnnotationParsingMode annotationParsingMode,
             @NotNull TokenSet noModifiersBefore
     ) {
+        return doParseModifierList(tokenConsumer, modifierKeywords, annotationParsingMode, noModifiersBefore, false);
+    }
+
+    private boolean doParseModifierList(
+            @Nullable Consumer<IElementType> tokenConsumer,
+            @NotNull TokenSet modifierKeywords,
+            @NotNull AnnotationParsingMode annotationParsingMode,
+            @NotNull TokenSet noModifiersBefore,
+            boolean withSignificantWhitespace
+    ) {
         PsiBuilder.Marker list = mark();
         boolean empty = true;
         while (!eof()) {
             if (at(AT) && annotationParsingMode.allowAnnotations) {
-                parseAnnotationOrList(annotationParsingMode);
+                parseAnnotationOrList(annotationParsingMode, withSignificantWhitespace);
             }
             else if (tryParseModifier(tokenConsumer, noModifiersBefore, modifierKeywords)) {
                 // modifier advanced
@@ -543,6 +557,29 @@ public class KotlinParsing extends AbstractKotlinParsing {
             list.done(MODIFIER_LIST);
         }
         return !empty;
+    }
+
+    private boolean tryParseTypeModifierList() {
+        PsiBuilder.Marker list = mark();
+        boolean empty = true;
+        boolean isSuccess = true;
+        while (!eof()) {
+            if (at(AT) && DEFAULT.allowAnnotations) {
+                isSuccess &= parseAnnotationOrList(DEFAULT);
+            }
+            else if (!tryParseModifier(null, TokenSet.EMPTY, TYPE_MODIFIER_KEYWORDS)) {
+                isSuccess = false;
+                break;
+            }
+            empty = false;
+        }
+        if (empty) {
+            list.drop();
+        }
+        else {
+            list.done(MODIFIER_LIST);
+        }
+        return isSuccess;
     }
 
     private boolean tryParseModifier(
@@ -624,6 +661,10 @@ public class KotlinParsing extends AbstractKotlinParsing {
      *   ;
      */
     private boolean parseAnnotationOrList(AnnotationParsingMode mode) {
+        return parseAnnotationOrList(mode, false);
+    }
+
+    private boolean parseAnnotationOrList(AnnotationParsingMode mode, boolean withSignificantWhitespace) {
         if (at(AT)) {
             IElementType nextRawToken = myBuilder.rawLookup(1);
             IElementType tokenToMatch = nextRawToken;
@@ -640,7 +681,7 @@ public class KotlinParsing extends AbstractKotlinParsing {
             }
 
             if (tokenToMatch == IDENTIFIER) {
-                return parseAnnotation(mode);
+                return parseAnnotation(mode, withSignificantWhitespace);
             }
             else if (tokenToMatch == LBRACKET) {
                 return parseAnnotationList(mode);
@@ -770,6 +811,10 @@ public class KotlinParsing extends AbstractKotlinParsing {
      *   ;
      */
     private boolean parseAnnotation(AnnotationParsingMode mode) {
+        return parseAnnotation(mode, false);
+    }
+
+    private boolean parseAnnotation(AnnotationParsingMode mode, boolean withSignificantWhitespace) {
         assert _at(IDENTIFIER) ||
                // We have "@ann" or "@:ann" or "@ :ann", but not "@ ann"
                // (it's guaranteed that call sites do not allow the latter case)
@@ -791,12 +836,13 @@ public class KotlinParsing extends AbstractKotlinParsing {
         PsiBuilder.Marker reference = mark();
         PsiBuilder.Marker typeReference = mark();
         parseUserType();
+        boolean whitespaceAfterAnnotation = WHITE_SPACE_OR_COMMENT_BIT_SET.contains(myBuilder.rawLookup(-1));
         typeReference.done(TYPE_REFERENCE);
         reference.done(CONSTRUCTOR_CALLEE);
 
         parseTypeArgumentList();
 
-        if (at(LPAR)) {
+        if ((!withSignificantWhitespace || !whitespaceAfterAnnotation) && at(LPAR)) {
             myExpressionParsing.parseValueArgumentList();
         }
         annotation.done(ANNOTATION_ENTRY);
@@ -1977,7 +2023,13 @@ public class KotlinParsing extends AbstractKotlinParsing {
     private PsiBuilder.Marker parseTypeRefContents(TokenSet extraRecoverySet) {
         PsiBuilder.Marker typeRefMarker = mark();
 
-        parseTypeModifierList();
+        boolean isParsed = tryParseTypeModifierList();
+
+        if (at(ARROW) || !isParsed) {
+            typeRefMarker.rollbackTo();
+            typeRefMarker = mark();
+            parseTypeModifierListWithSignificantWhitespace();
+        }
 
         PsiBuilder.Marker typeElementMarker = mark();
 
@@ -1995,7 +2047,7 @@ public class KotlinParsing extends AbstractKotlinParsing {
         else if (at(LPAR)) {
             PsiBuilder.Marker functionOrParenthesizedType = mark();
 
-            // This may be a function parameter list or just a prenthesized type
+            // This may be a function parameter list or just a parenthesized type
             advance(); // LPAR
             parseTypeRefContents(TokenSet.EMPTY).drop(); // parenthesized types, no reference element around it is needed
 

@@ -8,5 +8,25 @@
  */
 
 fun case_1() {
-    when (value) {}
+    val x: @Foo () -> Unit get() = {}
+    val x: (@Foo () -> Unit) get() = {}
+    val x: @Foo (() -> Unit) get() = {}
+    val x: @Foo.Bar () -> Unit get() = {}
+    val x: @Foo () -> () -> Unit get() = {}
+    val x: @Foo ()->()->Unit get() = {}
+    val x: @Foo @Bar () -> Unit get() = {}
+    val x: @Foo(10) @Bar () -> Unit get() = {}
+    val x: @Foo @Bar(10) @Foo () -> Unit get() = {}
+}
+
+fun case_2() {
+    val x: @Foo (Int) -> Unit = {}
+    val x: (@Foo (x: @Foo (@Foo () -> Int) -> Int) -> Unit) = {}
+    val x: @Foo (x: kotlin.Any) -> Unit = {}
+    val x: @Foo.Bar (x: kotlin.Any = {}) -> Unit = {}
+    val x: @Foo (x: @Foo Foo) -> (y: @Foo Bar) -> Unit = {}
+    val x: @Foo (x: @Foo kotlin.Any = {})->()->Unit = {}
+    val x: @Foo @Bar (kotlin.Any) -> Unit = {}
+    val x: @Foo(10) @Bar (Coomparable<kotlin.Any>) -> Unit = {}
+    val x: @Foo @Bar(10) @Foo (Coomparable<@Foo @Bar(10) @Foo () -> Unit>) -> Unit = {}
 }

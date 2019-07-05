@@ -14,15 +14,53 @@ KtFile: 3.1.kt
     BLOCK
       PsiElement(LBRACE)('{')
       PsiWhiteSpace('\n    ')
-      WHEN
-        PsiElement(when)('when')
+      PROPERTY
+        PsiElement(val)('val')
         PsiWhiteSpace(' ')
-        PsiElement(LPAR)('(')
-        REFERENCE_EXPRESSION
-          PsiElement(IDENTIFIER)('value')
-        PsiElement(RPAR)(')')
+        PsiElement(IDENTIFIER)('x')
+        PsiElement(COLON)(':')
         PsiWhiteSpace(' ')
-        PsiElement(LBRACE)('{')
-        PsiElement(RBRACE)('}')
+        TYPE_REFERENCE
+          MODIFIER_LIST
+            ANNOTATION_ENTRY
+              PsiElement(AT)('@')
+              CONSTRUCTOR_CALLEE
+                TYPE_REFERENCE
+                  USER_TYPE
+                    REFERENCE_EXPRESSION
+                      PsiElement(IDENTIFIER)('Foo')
+          PsiWhiteSpace(' ')
+          FUNCTION_TYPE
+            VALUE_PARAMETER_LIST
+              PsiElement(LPAR)('(')
+              VALUE_PARAMETER
+                PsiElement(IDENTIFIER)('x')
+                PsiElement(COLON)(':')
+                PsiWhiteSpace(' ')
+                TYPE_REFERENCE
+                  USER_TYPE
+                    USER_TYPE
+                      REFERENCE_EXPRESSION
+                        PsiElement(IDENTIFIER)('kotlin')
+                    PsiElement(DOT)('.')
+                    REFERENCE_EXPRESSION
+                      PsiElement(IDENTIFIER)('Any')
+              PsiElement(RPAR)(')')
+            PsiWhiteSpace(' ')
+            PsiElement(ARROW)('->')
+            PsiWhiteSpace(' ')
+            TYPE_REFERENCE
+              USER_TYPE
+                REFERENCE_EXPRESSION
+                  PsiElement(IDENTIFIER)('Unit')
+        PsiWhiteSpace(' ')
+        PsiElement(EQ)('=')
+        PsiWhiteSpace(' ')
+        LAMBDA_EXPRESSION
+          FUNCTION_LITERAL
+            PsiElement(LBRACE)('{')
+            BLOCK
+              <empty list>
+            PsiElement(RBRACE)('}')
       PsiWhiteSpace('\n')
       PsiElement(RBRACE)('}')

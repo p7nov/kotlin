@@ -56,6 +56,8 @@ class AnnotationChecker(
             annotated.typeParameters.forEach { check(it, trace) }
         }
         if (annotated is KtTypeReference) {
+            val x = annotated.hasParentheses()
+            val y = annotated.typeElement
             annotated.typeElement?.typeArgumentsAsTypes?.filterNotNull()?.forEach { check(it, trace) }
         }
         if (annotated is KtDeclarationWithBody) {

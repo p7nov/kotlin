@@ -1166,6 +1166,24 @@ public class DiagnosticsTestGenerated extends AbstractDiagnosticsTest {
                 }
             }
 
+            @TestMetadata("compiler/testData/diagnostics/tests/annotations/functionalTypes")
+            @TestDataPath("$PROJECT_ROOT")
+            @RunWith(JUnit3RunnerWithInners.class)
+            public static class FunctionalTypes extends AbstractDiagnosticsTest {
+                private void runTest(String testDataFilePath) throws Exception {
+                    KotlinTestUtils.runTest(this::doTest, TargetBackend.ANY, testDataFilePath);
+                }
+
+                @TestMetadata("1.kt")
+                public void test1() throws Exception {
+                    runTest("compiler/testData/diagnostics/tests/annotations/functionalTypes/1.kt");
+                }
+
+                public void testAllFilesPresentInFunctionalTypes() throws Exception {
+                    KotlinTestUtils.assertAllTestsPresentByMetadata(this.getClass(), new File("compiler/testData/diagnostics/tests/annotations/functionalTypes"), Pattern.compile("^(.*)\\.kts?$"), TargetBackend.ANY, true);
+                }
+            }
+
             @TestMetadata("compiler/testData/diagnostics/tests/annotations/options")
             @TestDataPath("$PROJECT_ROOT")
             @RunWith(JUnit3RunnerWithInners.class)
