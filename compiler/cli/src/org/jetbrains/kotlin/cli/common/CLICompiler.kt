@@ -23,7 +23,7 @@ import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys.MESSAGE_COLLECTOR_KE
 import org.jetbrains.kotlin.cli.common.ExitCode.COMPILATION_ERROR
 import org.jetbrains.kotlin.cli.common.ExitCode.INTERNAL_ERROR
 import org.jetbrains.kotlin.cli.common.arguments.CommonCompilerArguments
-import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
+import org.jetbrains.kotlin.cli.common.environment.ideaCliSetup
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity.INFO
 import org.jetbrains.kotlin.cli.common.messages.GroupingMessageCollector
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -79,7 +79,7 @@ abstract class CLICompiler<A : CommonCompilerArguments> : CLITool<A>() {
 
             val rootDisposable = Disposer.newDisposable()
             try {
-                setIdeaIoUseFallback()
+                ideaCliSetup()
 
                 val code = doExecute(arguments, configuration, rootDisposable, paths)
 

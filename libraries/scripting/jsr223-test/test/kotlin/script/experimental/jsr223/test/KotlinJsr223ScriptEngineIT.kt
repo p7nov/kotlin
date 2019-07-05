@@ -5,7 +5,7 @@
 
 package kotlin.script.experimental.jsr223.test
 
-import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
+import org.jetbrains.kotlin.cli.common.environment.ideaCliSetup
 import org.jetbrains.kotlin.config.KotlinCompilerVersion
 import org.junit.Assert
 import org.junit.Test
@@ -15,7 +15,7 @@ import kotlin.script.experimental.jvmhost.jsr223.KotlinJsr223ScriptEngineImpl
 class KotlinJsr223ScriptEngineIT {
 
     init {
-        setIdeaIoUseFallback()
+        ideaCliSetup()
     }
 
     @Test

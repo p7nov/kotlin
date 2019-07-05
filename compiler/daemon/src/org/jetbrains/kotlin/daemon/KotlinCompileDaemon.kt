@@ -17,7 +17,7 @@
 package org.jetbrains.kotlin.daemon
 
 import org.jetbrains.kotlin.cli.common.CLICompiler
-import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
+import org.jetbrains.kotlin.cli.common.environment.ideaCliSetup
 import org.jetbrains.kotlin.cli.js.K2JSCompiler
 import org.jetbrains.kotlin.cli.jvm.K2JVMCompiler
 import org.jetbrains.kotlin.cli.metadata.K2MetadataCompiler
@@ -111,7 +111,7 @@ abstract class KotlinCompileDaemonBase {
         log.info("daemon JVM args: " + jvmArguments.joinToString(" "))
         log.info("daemon args: " + args.joinToString(" "))
 
-        setIdeaIoUseFallback()
+        ideaCliSetup()
 
         val compilerId = CompilerId()
         val daemonOptions = DaemonOptions()

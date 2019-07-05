@@ -10,7 +10,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiFileFactory
 import com.intellij.psi.impl.PsiFileFactoryImpl
-import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
+import org.jetbrains.kotlin.cli.common.environment.ideaCliSetup
 import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.idea.KotlinLanguage
 import org.jetbrains.kotlin.psi.KtFile
@@ -22,7 +22,6 @@ import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 import java.util.*
 import kotlin.script.experimental.api.*
 import kotlin.script.experimental.host.FileBasedScriptSource
-import kotlin.script.experimental.host.FileScriptSource
 import kotlin.script.experimental.host.getMergedScriptText
 import kotlin.script.experimental.jvm.impl.KJvmCompiledScript
 
@@ -51,7 +50,7 @@ internal inline fun <T> withMessageCollectorAndDisposable(
 ): ResultWithDiagnostics<T> {
     var failed = false
     return try {
-        setIdeaIoUseFallback()
+        ideaCliSetup()
         body(messageCollector, disposable).also {
             failed = it is ResultWithDiagnostics.Failure
         }

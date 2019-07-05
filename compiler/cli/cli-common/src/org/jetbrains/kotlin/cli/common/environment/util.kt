@@ -18,7 +18,9 @@ package org.jetbrains.kotlin.cli.common.environment
 
 import com.intellij.openapi.util.SystemInfo
 
-fun setIdeaIoUseFallback() {
+private val IDEA_IGNORE_DISABLED_PLUGINS = "idea.ignore.disabled.plugins"
+
+fun ideaCliSetup() {
     if (SystemInfo.isWindows) {
         val properties = System.getProperties()
 
@@ -27,5 +29,9 @@ fun setIdeaIoUseFallback() {
         if (!(SystemInfo.isJavaVersionAtLeast(1, 7, 0) && "1.7.0-ea" != SystemInfo.JAVA_VERSION)) {
             properties.setProperty("idea.io.use.fallback", java.lang.Boolean.TRUE.toString())
         }
+    }
+
+    if (System.getProperty(IDEA_IGNORE_DISABLED_PLUGINS) == null) {
+        System.setProperty(IDEA_IGNORE_DISABLED_PLUGINS, "true")
     }
 }

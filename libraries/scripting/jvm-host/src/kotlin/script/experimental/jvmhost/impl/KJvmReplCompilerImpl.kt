@@ -7,7 +7,7 @@ package kotlin.script.experimental.jvmhost.impl
 
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.project.Project
-import org.jetbrains.kotlin.cli.common.environment.setIdeaIoUseFallback
+import org.jetbrains.kotlin.cli.common.environment.ideaCliSetup
 import org.jetbrains.kotlin.cli.common.messages.AnalyzerWithCompilerReport
 import org.jetbrains.kotlin.cli.common.messages.MessageCollectorBasedReporter
 import org.jetbrains.kotlin.cli.common.repl.IReplStageHistory
@@ -68,7 +68,7 @@ class KJvmReplCompilerImpl(val hostConfiguration: ScriptingHostConfiguration) : 
                     snippet, messageCollector, "Internal error: unknown parameter passed as compilationState: $compilationState"
                 )
 
-            setIdeaIoUseFallback()
+            ideaCliSetup()
 
             // NOTE: converting between REPL entities from compiler and "new" scripting entities
             // TODO: (big) move REPL API from compiler to the new scripting infrastructure and streamline ops
