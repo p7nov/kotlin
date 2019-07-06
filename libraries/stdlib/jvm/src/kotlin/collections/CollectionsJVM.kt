@@ -49,6 +49,24 @@ internal actual fun <T> Array<out T>.copyToArrayOfAny(isVarargs: Boolean): Array
 @PublishedApi
 @SinceKotlin("1.3")
 @InlineOnly
+@JvmName("optimizeReadOnlyListInline")
+internal actual inline fun <T> List<T>.optimizeReadOnlyList(): List<T> = when {
+    apiVersionIsAtLeast(1, 1, 0) -> optimizeReadOnlyListImpl()
+    else -> this
+}
+
+@PublishedApi
+@SinceKotlin("1.1")
+@JvmName("optimizeReadOnlyList")
+internal fun <T> List<T>.optimizeReadOnlyListImpl(): List<T> = when (size) {
+    0 -> emptyList()
+    1 -> listOf(this[0])
+    else -> this
+}
+
+@PublishedApi
+@SinceKotlin("1.3")
+@InlineOnly
 internal actual inline fun checkIndexOverflow(index: Int): Int {
     if (index < 0) {
         if (apiVersionIsAtLeast(1, 3, 0))

@@ -148,6 +148,14 @@ internal fun <T> arrayCopy(source: Array<out T>, destination: Array<in T>, desti
     }
 }
 
+@PublishedApi
+@SinceKotlin("1.1")
+internal actual fun <T> List<T>.optimizeReadOnlyList(): List<T> = when (size) {
+    0 -> emptyList()
+//    1 -> listOf(this[0]) // no singleton list implementation in js
+    else -> this
+}
+
 // no singleton map implementation in js, return map as is
 @Suppress("NOTHING_TO_INLINE")
 internal actual inline fun <K, V> Map<K, V>.toSingletonMapOrSelf(): Map<K, V> = this
