@@ -231,9 +231,11 @@ public abstract class KotlinCompileMojoBase<A extends CommonCompilerArguments> e
             A arguments,
             List<File> sourceRoots
     ) throws MojoExecutionException {
+        ArrayList<String> freeArgs = new ArrayList<>(arguments.getFreeArgs());
         for (File sourceRoot : sourceRoots) {
-            arguments.getFreeArgs().add(sourceRoot.getPath());
+            freeArgs.add(sourceRoot.getPath());
         }
+        arguments.setFreeArgs(freeArgs);
         return compiler.exec(messageCollector, Services.EMPTY, arguments);
     }
 
