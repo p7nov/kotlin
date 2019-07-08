@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.resolve.jvm.AsmTypes.OBJECT_TYPE
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.utils.SmartList
 import org.jetbrains.kotlin.utils.SmartSet
+import org.jetbrains.kotlin.utils.filterInPlaceNot
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 import org.jetbrains.org.objectweb.asm.Label
 import org.jetbrains.org.objectweb.asm.MethodVisitor
@@ -669,7 +670,7 @@ class MethodInliner(
         processingNode.remove(toDelete)
 
         //clean dead try/catch blocks
-        processingNode.tryCatchBlocks.removeIf { it.isMeaningless() }
+        processingNode.tryCatchBlocks.filterInPlaceNot { it.isMeaningless() }
 
         return processingNode
     }

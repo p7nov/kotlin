@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.codegen.optimization.common.findNextOrNull
 import org.jetbrains.kotlin.codegen.optimization.common.hasOpcode
 import org.jetbrains.kotlin.codegen.pseudoInsns.PseudoInsn
 import org.jetbrains.kotlin.utils.SmartSet
+import org.jetbrains.kotlin.utils.addToStdlib.mapInPlace
 import org.jetbrains.org.objectweb.asm.Label
 import org.jetbrains.org.objectweb.asm.Opcodes
 import org.jetbrains.org.objectweb.asm.tree.AbstractInsnNode
@@ -54,7 +55,7 @@ internal fun insertTryCatchBlocksMarkers(methodNode: MethodNode): Map<AbstractIn
 }
 
 private fun transformTryCatchBlocks(methodNode: MethodNode, newTryStartLabels: HashMap<LabelNode, LabelNode>) {
-    methodNode.tryCatchBlocks = methodNode.tryCatchBlocks.map { tcb ->
+    methodNode.tryCatchBlocks.mapInPlace { tcb ->
         val newTryStartLabel = newTryStartLabels[tcb.start]
         if (newTryStartLabel == null)
             tcb

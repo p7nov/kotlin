@@ -92,3 +92,62 @@ fun <T> List<T>.indexOfFirst(startFrom: Int, predicate: (T) -> Boolean): Int {
     }
     return -1
 }
+
+inline fun <T> MutableList<T>.mapInPlace(transform: (T) -> T) {
+    val it = listIterator()
+    while (it.hasNext()) {
+        it.set(transform(it.next()))
+    }
+}
+
+inline fun <T> MutableList<T>.filterInPlace(predicate: (T) -> Boolean): Boolean {
+    var writeIndex: Int = 0
+    for (readIndex in 0..lastIndex) {
+        val element = this[readIndex]
+        if (!predicate(element)) // predicate evaluates to false -- continue
+            continue
+
+        if (writeIndex != readIndex)
+            this[writeIndex] = element
+
+        writeIndex++
+    }
+    val removed = size - writeIndex
+    if (removed > 0) {
+        dropLastInPlace(removed)
+        return true
+    } else {
+        return false
+    }
+}
+inline fun <T> MutableList<T>.filterInPlaceNot(predicate: (T) -> Boolean): Boolean {
+    var writeIndex: Int = 0
+    for (readIndex in 0..lastIndex) {
+        val element = this[readIndex]
+        if (predicate(element))
+            continue
+
+        if (writeIndex != readIndex)
+            this[writeIndex] = element
+
+        writeIndex++
+    }
+    val removed = size - writeIndex
+    if (removed > 0) {
+        dropLastInPlace(removed)
+        return true
+    } else {
+        return false
+    }
+}
+
+fun MutableList<*>.dropLastInPlace(n: Int) {
+    when {
+        n == 0 -> return
+        n < size -> {
+            for (removeIndex in lastIndex downTo size - n)
+                removeAt(removeIndex)
+        }
+        else -> clear()
+    }
+}

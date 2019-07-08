@@ -19,6 +19,7 @@ package org.jetbrains.kotlin.codegen.optimization
 import org.jetbrains.kotlin.codegen.optimization.common.removeEmptyCatchBlocks
 import org.jetbrains.kotlin.codegen.optimization.transformer.MethodTransformer
 import org.jetbrains.kotlin.utils.SmartIdentityTable
+import org.jetbrains.kotlin.utils.mapInPlace
 import org.jetbrains.org.objectweb.asm.Label
 import org.jetbrains.org.objectweb.asm.tree.*
 import java.lang.IllegalStateException
@@ -98,7 +99,7 @@ class LabelNormalizationMethodTransformer : MethodTransformer() {
             instructions.replaceNodeGetNext(oldFrameNode, oldFrameNode.rewriteLabels())
 
         private fun rewriteTryCatchBlocks() {
-            methodNode.tryCatchBlocks = methodNode.tryCatchBlocks.map { oldTcb ->
+            methodNode.tryCatchBlocks.mapInPlace { oldTcb ->
                 val newTcb = TryCatchBlockNode(getNew(oldTcb.start), getNew(oldTcb.end), getNew(oldTcb.handler), oldTcb.type)
                 newTcb.visibleTypeAnnotations = oldTcb.visibleTypeAnnotations
                 newTcb.invisibleTypeAnnotations = oldTcb.invisibleTypeAnnotations
@@ -107,7 +108,7 @@ class LabelNormalizationMethodTransformer : MethodTransformer() {
         }
 
         private fun rewriteLocalVars() {
-            methodNode.localVariables = methodNode.localVariables.map { oldVar ->
+            methodNode.localVariables.mapInPlace { oldVar ->
                 LocalVariableNode(
                     oldVar.name,
                     oldVar.desc,

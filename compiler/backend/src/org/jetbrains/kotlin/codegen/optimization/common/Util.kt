@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.codegen.inline.MaxStackFrameSizeAndLocalsCalculator
 import org.jetbrains.kotlin.codegen.inline.insnText
 import org.jetbrains.kotlin.codegen.optimization.removeNodeGetNext
 import org.jetbrains.kotlin.codegen.pseudoInsns.PseudoInsn
+import org.jetbrains.kotlin.utils.filterInPlace
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 import org.jetbrains.org.objectweb.asm.MethodVisitor
 import org.jetbrains.org.objectweb.asm.Opcodes
@@ -59,7 +60,7 @@ fun MethodNode.prepareForEmitting() {
     removeEmptyCatchBlocks()
 
     // local variables with live ranges starting after last meaningful instruction lead to VerifyError
-    localVariables = localVariables.filter { lv ->
+    localVariables.filterInPlace { lv ->
         InsnSequence(lv.start, lv.end).any(AbstractInsnNode::isMeaningful)
     }
 
@@ -102,7 +103,7 @@ private fun isOptimizationMarker(insn: AbstractInsnNode) =
     PseudoInsn.STORE_NOT_NULL.isa(insn)
 
 fun MethodNode.removeEmptyCatchBlocks() {
-    tryCatchBlocks = tryCatchBlocks.filter { tcb ->
+    tryCatchBlocks.filterInPlace { tcb ->
         InsnSequence(tcb.start, tcb.end).any(AbstractInsnNode::isMeaningful)
     }
 }
