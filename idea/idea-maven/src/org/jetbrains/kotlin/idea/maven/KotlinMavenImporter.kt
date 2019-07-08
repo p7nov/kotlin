@@ -121,7 +121,7 @@ class KotlinMavenImporter : MavenImporter(KOTLIN_PLUGIN_GROUP_ID, KOTLIN_PLUGIN_
             }
         }
 
-        configureFacet(mavenProject, modifiableModelsProvider, module, false) //HMPP is not supported currently for maven
+        configureFacet(mavenProject, modifiableModelsProvider, module, false, emptyList()) //HMPP is not supported currently for maven
     }
 
     private fun scheduleDownloadStdlibSources(mavenProject: MavenProject, module: Module) {
