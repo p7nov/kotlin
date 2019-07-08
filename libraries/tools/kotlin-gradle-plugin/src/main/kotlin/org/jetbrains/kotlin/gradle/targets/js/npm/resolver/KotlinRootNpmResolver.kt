@@ -105,7 +105,7 @@ internal class KotlinRootNpmResolver internal constructor(
         return resolution
     }
 
-    fun closePlugins(resolution: KotlinRootNpmResolution) {
+    internal fun closePlugins(resolution: KotlinRootNpmResolution) {
         plugins.forEach {
             it.close(resolution)
         }
